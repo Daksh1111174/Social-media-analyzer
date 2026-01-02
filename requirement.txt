@@ -1,0 +1,6 @@
+streamlit
+feedparser
+pandas
+wordcloud
+matplotlib
+requests
