@@ -1,8 +1,6 @@
 # =====================================
 # SOCIAL MEDIA TREND ANALYZER
-# 3 TABS: FACEBOOK | TWITTER | REDDIT
-# USER TOPIC → ~500 WORDS → WORDCLOUD
-# NO feedparser (STREAMLIT CLOUD SAFE)
+# NO feedparser | STREAMLIT CLOUD SAFE
 # =====================================
 
 import streamlit as st
@@ -21,6 +19,19 @@ st.caption("Facebook | Twitter | Reddit – Topic Based WordCloud")
 # -------------------------------------
 # HELPER FUNCTIONS
 # -------------------------------------
+def fetch_rss_text(url):
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(url, headers=headers, timeout=10)
+    root = ET.fromstring(response.content)
+
+    titles = []
+    for item in root.findall(".//item/title"):
+        if item.text:
+            titles.append(item.text)
+
+    return " ".join(titles)
+
+
 def generate_wordcloud(text):
     wc = WordCloud(
         width=900,
@@ -34,31 +45,16 @@ def generate_wordcloud(text):
     ax.axis("off")
     st.pyplot(fig)
 
-
-def fetch_rss_text(url):
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
-    root = ET.fromstring(response.content)
-
-    titles = []
-    for item in root.findall(".//item/title"):
-        if item.text:
-            titles.append(item.text)
-
-    return " ".join(titles)
-
-
 # -------------------------------------
 # TABS
 # -------------------------------------
 tab1, tab2, tab3 = st.tabs(["📘 Facebook", "🐦 Twitter", "👽 Reddit"])
 
 # -------------------------------------
-# FACEBOOK TAB (SIMULATED VIA NEWS)
+# FACEBOOK TAB (SIMULATED)
 # -------------------------------------
 with tab1:
-    st.subheader("Facebook Trend Analysis")
     topic = st.text_input("Enter topic for Facebook:")
-
     if st.button("Generate Facebook WordCloud"):
         if topic:
             url = f"https://news.google.com/rss/search?q={topic}+facebook"
@@ -68,12 +64,10 @@ with tab1:
             st.warning("Please enter a topic")
 
 # -------------------------------------
-# TWITTER TAB (SIMULATED VIA NEWS)
+# TWITTER TAB (SIMULATED)
 # -------------------------------------
 with tab2:
-    st.subheader("Twitter Trend Analysis")
     topic = st.text_input("Enter topic for Twitter:")
-
     if st.button("Generate Twitter WordCloud"):
         if topic:
             url = f"https://news.google.com/rss/search?q={topic}+twitter"
@@ -86,9 +80,7 @@ with tab2:
 # REDDIT TAB (REAL DATA)
 # -------------------------------------
 with tab3:
-    st.subheader("Reddit Trend Analysis")
     topic = st.text_input("Enter topic for Reddit:")
-
     if st.button("Generate Reddit WordCloud"):
         if topic:
             url = f"https://www.reddit.com/search.rss?q={topic}"
@@ -96,3 +88,4 @@ with tab3:
             generate_wordcloud(text)
         else:
             st.warning("Please enter a topic")
+
