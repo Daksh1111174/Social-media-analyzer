@@ -1,17 +1,18 @@
-# Social-media-analyzer
 # 📊 Social Media Trend Analyzer
 
-A Streamlit application that analyzes topic-based trends across Facebook, Twitter, and Reddit.
+A Streamlit application that generates topic-based word clouds for Facebook, Twitter, and Reddit.
 
 ## 🚀 Features
-- Three separate tabs: Facebook, Twitter, Reddit
+- Three tabs: Facebook, Twitter, Reddit
 - User-defined topic input
-- Fetches ~500 words of text per platform
-- Generates WordCloud for trend visualization
-- No paid API keys required
+- ~500 words fetched per platform
+- WordCloud visualization
+- No paid APIs
+- Streamlit Cloud compatible
 
-## ⚠️ API Note
-Due to restrictions on Facebook and Twitter APIs, public news feeds are used to simulate social media text streams for academic purposes.
+## ⚠️ Note
+Facebook and Twitter APIs are restricted.  
+Public news RSS feeds are used to simulate social media text streams for academic purposes.
 
 ## ▶️ Run Locally
 ```bash
