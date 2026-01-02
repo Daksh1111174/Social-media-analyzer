@@ -1,15 +1,15 @@
 # =====================================
 # SOCIAL MEDIA TREND ANALYZER
 # 3 TABS: FACEBOOK | TWITTER | REDDIT
-# USER TOPIC → 500 WORDS → WORDCLOUD
+# USER TOPIC → ~500 WORDS → WORDCLOUD
+# NO feedparser (STREAMLIT CLOUD SAFE)
 # =====================================
 
 import streamlit as st
-import feedparser
-import pandas as pd
+import requests
+import xml.etree.ElementTree as ET
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-import requests
 
 # -------------------------------------
 # APP CONFIG
@@ -21,7 +21,6 @@ st.caption("Facebook | Twitter | Reddit – Topic Based WordCloud")
 # -------------------------------------
 # HELPER FUNCTIONS
 # -------------------------------------
-
 def generate_wordcloud(text):
     wc = WordCloud(
         width=900,
@@ -35,28 +34,18 @@ def generate_wordcloud(text):
     ax.axis("off")
     st.pyplot(fig)
 
-# ---------- REDDIT ----------
-def fetch_reddit(topic):
-    url = f"https://www.reddit.com/search.rss?q={topic}"
-    feed = feedparser.parse(url)
-    texts = [entry.title for entry in feed.entries]
-    return " ".join(texts)
 
-# ---------- TWITTER (SIMULATED via NEWS SEARCH) ----------
-def fetch_twitter(topic):
-    # Public news search used as Twitter-like text stream
-    url = f"https://api.allorigins.win/raw?url=https://news.google.com/rss/search?q={topic}"
-    feed = feedparser.parse(url)
-    texts = [entry.title for entry in feed.entries]
-    return " ".join(texts)
+def fetch_rss_text(url):
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+    root = ET.fromstring(response.content)
 
-# ---------- FACEBOOK (SIMULATED via NEWS SEARCH) ----------
-def fetch_facebook(topic):
-    # Facebook public posts not accessible → simulated via news headlines
-    url = f"https://api.allorigins.win/raw?url=https://news.google.com/rss/search?q={topic}+facebook"
-    feed = feedparser.parse(url)
-    texts = [entry.title for entry in feed.entries]
-    return " ".join(texts)
+    titles = []
+    for item in root.findall(".//item/title"):
+        if item.text:
+            titles.append(item.text)
+
+    return " ".join(titles)
+
 
 # -------------------------------------
 # TABS
@@ -64,7 +53,7 @@ def fetch_facebook(topic):
 tab1, tab2, tab3 = st.tabs(["📘 Facebook", "🐦 Twitter", "👽 Reddit"])
 
 # -------------------------------------
-# FACEBOOK TAB
+# FACEBOOK TAB (SIMULATED VIA NEWS)
 # -------------------------------------
 with tab1:
     st.subheader("Facebook Trend Analysis")
@@ -72,13 +61,14 @@ with tab1:
 
     if st.button("Generate Facebook WordCloud"):
         if topic:
-            text = fetch_facebook(topic)
+            url = f"https://news.google.com/rss/search?q={topic}+facebook"
+            text = fetch_rss_text(url)
             generate_wordcloud(text)
         else:
             st.warning("Please enter a topic")
 
 # -------------------------------------
-# TWITTER TAB
+# TWITTER TAB (SIMULATED VIA NEWS)
 # -------------------------------------
 with tab2:
     st.subheader("Twitter Trend Analysis")
@@ -86,13 +76,14 @@ with tab2:
 
     if st.button("Generate Twitter WordCloud"):
         if topic:
-            text = fetch_twitter(topic)
+            url = f"https://news.google.com/rss/search?q={topic}+twitter"
+            text = fetch_rss_text(url)
             generate_wordcloud(text)
         else:
             st.warning("Please enter a topic")
 
 # -------------------------------------
-# REDDIT TAB
+# REDDIT TAB (REAL DATA)
 # -------------------------------------
 with tab3:
     st.subheader("Reddit Trend Analysis")
@@ -100,7 +91,8 @@ with tab3:
 
     if st.button("Generate Reddit WordCloud"):
         if topic:
-            text = fetch_reddit(topic)
+            url = f"https://www.reddit.com/search.rss?q={topic}"
+            text = fetch_rss_text(url)
             generate_wordcloud(text)
         else:
             st.warning("Please enter a topic")
